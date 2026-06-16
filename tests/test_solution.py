@@ -114,6 +114,19 @@ class TestRAGASEvaluator(unittest.TestCase):
         # Minimal overlap (only stopwords like "is" and "a")
         self.assertLess(score, 0.4)
 
+    def test_conciseness_concise_answer(self):
+        expected = "Lists are mutable and tuples are immutable."
+        answer = "Lists are mutable and tuples are immutable."
+        score = self.evaluator.evaluate_conciseness(answer, expected)
+        self.assertEqual(score, 1.0)
+
+    def test_conciseness_verbose_answer(self):
+        expected = "Lists are mutable."
+        # Very verbose answer
+        answer = "Lists are mutable collections of elements which can be modified after creation because they support item assignment and extension."
+        score = self.evaluator.evaluate_conciseness(answer, expected)
+        self.assertLess(score, 1.0)
+
 
 class TestContextMetrics(unittest.TestCase):
     """Retrieval-side RAGAS metrics: Context Recall + Context Precision."""

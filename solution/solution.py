@@ -206,6 +206,25 @@ class RAGASEvaluator:
         score = overlap / len(expected_tokens)
         return max(0.0, min(1.0, score))
 
+    def evaluate_conciseness(self, answer: str, expected: str) -> float:
+        """
+        Measure the conciseness of the answer relative to the expected answer.
+        It rewards answers that are not overly verbose compared to the reference.
+        
+        Formula:
+            ratio = len(_tokenize(answer)) / len(_tokenize(expected)) if expected else 1.0
+            If ratio <= 1.5: conciseness = 1.0
+            Else: conciseness = max(0.0, 1.0 - (ratio - 1.5) * 0.5)
+        """
+        expected_tokens = _tokenize(expected)
+        answer_tokens = _tokenize(answer)
+        if not expected_tokens:
+            return 1.0
+        ratio = len(answer_tokens) / len(expected_tokens)
+        if ratio <= 1.5:
+            return 1.0
+        return max(0.0, min(1.0, 1.0 - (ratio - 1.5) * 0.5))
+
     # -----------------------------------------------------------------------
     # Task 2b — Retrieval-side metrics (evaluate the GET-CONTEXT step)
     # -----------------------------------------------------------------------
